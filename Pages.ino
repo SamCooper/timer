@@ -12,7 +12,7 @@ void init_page_styles() {
   lv_style_set_bg_color(&style_mode_btn, lv_color_hex(0x009900));
 }
 
-void exit_conf_btn_clicked_event_cb(lv_event_t *e) {
+void exit_conf_btn_clicked_event_cb(lv_event_t* e) {
   exit_conf_page(page_cont, footer_cont);
 }
 
@@ -52,11 +52,11 @@ void create_system_config_page(lv_obj_t* cont) {
   lv_obj_add_event_cb(btn, firmware_btn_click_event_cb, LV_EVENT_SHORT_CLICKED, label);
   lv_obj_add_event_cb(btn, firmware_btn_long_click_event_cb, LV_EVENT_LONG_PRESSED, label);
 
-  lv_obj_t *exit_btn = lv_button_create(cont);
+  lv_obj_t* exit_btn = lv_button_create(cont);
   lv_obj_set_pos(exit_btn, 340, 200);
   lv_obj_add_event_cb(exit_btn, exit_conf_btn_clicked_event_cb, LV_EVENT_CLICKED, NULL);
 
-  lv_obj_t *exit_label = lv_label_create(exit_btn);
+  lv_obj_t* exit_label = lv_label_create(exit_btn);
   lv_label_set_text(exit_label, LV_SYMBOL_CLOSE);
 }
 
@@ -123,19 +123,45 @@ void curr_time_home_cb(lv_observer_t* observer, lv_subject_t* subject) {
   lv_subject_copy_string(&time_str_subject, timestamp.c_str());
 }
 
-void create_home_page(lv_obj_t* cont) {
-  lv_obj_t* label = lv_label_create(cont);
-  lv_obj_align(label, LV_ALIGN_TOP_MID, 0, 0);
-  lv_label_bind_text(label, &heating_on_subject, "Heating: %d");
+void image_heating_set(lv_obj_t* img1, lv_obj_t* img2, lv_subject_t* subject) {
+  LV_IMAGE_DECLARE(fire);
+  LV_IMAGE_DECLARE(fire_inactive);
 
-  label = lv_label_create(cont);
-  lv_obj_align(label, LV_ALIGN_TOP_MID, 0, 50);
-  lv_obj_set_style_text_font(label, &lv_font_montserrat_40, 0);
+  if (0 == lv_subject_get_int(subject)) {
+    lv_image_set_src(img1, &fire_inactive);
+    lv_image_set_src(img2, &fire_inactive);
+  } else {
+    lv_image_set_src(img1, &fire);
+    lv_image_set_src(img2, &fire);
+  }
+}
+
+void image_heating_cb(lv_observer_t* observer, lv_subject_t* subject) {
+  lv_obj_t* img1 = lv_observer_get_target_obj(observer);
+  lv_obj_t* img2 = (lv_obj_t*)lv_observer_get_user_data(observer);
+
+  image_heating_set(img1, img2, subject);
+}
+
+void create_home_page(lv_obj_t* cont) {
+  lv_obj_t* img1 = lv_image_create(cont);
+  lv_obj_align(img1, LV_ALIGN_CENTER, -160, -40);
+
+  lv_obj_t* img2 = lv_image_create(cont);
+  lv_obj_align(img2, LV_ALIGN_CENTER, 160, -40);
+  image_heating_set(img1, img2, &heating_on_subject);
+
+  lv_subject_add_observer_obj(&heating_on_subject, image_heating_cb, img1, img2);
+
+  lv_obj_t* label = lv_label_create(cont);
+  lv_obj_align(label, LV_ALIGN_TOP_MID, 0, 60);
+  lv_obj_set_style_text_font(label, &lv_font_montserrat_48, 0);
   lv_label_bind_text(label, &time_str_subject, "%s");
   lv_subject_add_observer_obj(&curr_time_subject, curr_time_home_cb, label, NULL);
 
   label = lv_label_create(cont);
-  lv_obj_align(label, LV_ALIGN_TOP_MID, 0, 100);
+  lv_obj_align(label, LV_ALIGN_TOP_MID, 0, 180);
+  lv_obj_set_style_text_font(label, &lv_font_montserrat_26, 0);
   lv_label_bind_text(label, &next_time_str_subject, "%s");
 }
 

@@ -12,7 +12,7 @@ static bool touch_i2c_write(uint8_t driver_addr, uint8_t reg_addr, const uint8_t
 
 
     if (touch_i2c.endTransmission() != 0) {
-        Serial.println("The I2C transmission fails. - I2C Read\r\n");
+//        Serial.println("The I2C transmission fails. - I2C Read\r\n");
         return false;
     }
     return true;
@@ -23,13 +23,13 @@ static bool touch_i2c_read(uint8_t driver_addr, uint8_t reg_addr, uint8_t *data,
     touch_i2c.beginTransmission(driver_addr);
     touch_i2c.write(reg_addr);
     if (touch_i2c.endTransmission() != 0) {
-        Serial.println("The I2C write fails. - I2C Read\r\n");
+        // Serial.println("The I2C write fails. - I2C Read\r\n");
         return false;
     }
 
     touch_i2c.requestFrom(driver_addr, length);
     if (touch_i2c.available() != length) {
-        Serial.println("The I2C read fails. - I2C Read\r\n");
+        // Serial.println("The I2C read fails. - I2C Read\r\n");
         return false;
     }
     touch_i2c.readBytes(data, length);
@@ -49,9 +49,9 @@ bool touch_init(int tp_sda, int tp_scl, int tp_rst, int tp_int)
 
     uint8_t data[5] = {0};
     touch_i2c_read(FT6336U_ADDR, FT6336U_ID_REG, data, 1);
-    if (data[0] != 0){
-        Serial.printf("读取成功：%x\n", data[0]);
-    }
+    // if (data[0] != 0){
+    //     // Serial.printf("读取成功：%x\n", data[0]);
+    // }
     return true;
 }
 

@@ -56,10 +56,10 @@ void updateHeating() {
   }
 
   if (heating_on != prev_heating_on) {
-    Serial.print("Heating: ");
-    Serial.print(prev_heating_on);
-    Serial.print("  to: ");
-    Serial.println(heating_on);
+    // Serial.print("Heating: ");
+    // Serial.print(prev_heating_on);
+    // Serial.print("  to: ");
+    // Serial.println(heating_on);
     lv_subject_set_int(&heating_on_subject, heating_on);
     digitalWrite(HEATING_GPIO, heating_on ? GPIO_HEATING_ON : GPIO_HEATING_OFF);
   }

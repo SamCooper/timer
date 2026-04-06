@@ -1,6 +1,6 @@
 #include <Preferences.h>
 #include <WiFi.h>
-#include <NTPClient.h>
+#include "NTPClient.h"
 #include <WiFiClient.h>
 #include <WebServer.h>
 #include <Update.h>
@@ -60,7 +60,7 @@ WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP);
 WebServer server(80);
 
-uint32_t draw_buf[DRAW_BUF_SIZE / 4];
+uint32_t* draw_buf;
 
 lv_subject_t current_tab_subject;
 lv_subject_t conf_brightness_subject;
@@ -78,8 +78,8 @@ lv_subject_t heating_boost_next_subject;
 lv_subject_t heating_boost_hours_subject;
 unsigned long heating_boost_hours_end_time = 0;
 
-time_pair_t morning_time_pair{ .start_time = &timer_morning_start_subject, .end_time = &timer_morning_end_subject , .set_start_time_cb = set_morning_start, .set_end_time_cb = set_morning_end};
-time_pair_t evening_time_pair{ .start_time = &timer_evening_start_subject, .end_time = &timer_evening_end_subject , .set_start_time_cb = set_evening_start, .set_end_time_cb = set_evening_end};
+time_pair_t morning_time_pair{ .start_time = &timer_morning_start_subject, .end_time = &timer_morning_end_subject, .set_start_time_cb = set_morning_start, .set_end_time_cb = set_morning_end };
+time_pair_t evening_time_pair{ .start_time = &timer_evening_start_subject, .end_time = &timer_evening_end_subject, .set_start_time_cb = set_evening_start, .set_end_time_cb = set_evening_end };
 
 
 lv_obj_t* page_cont;
@@ -87,27 +87,37 @@ lv_obj_t* footer_cont;
 unsigned long lastSecond = 0;
 unsigned long lastTime = 0;
 
-// If logging is enabled, it will inform the user about what is happening in the library
-void log_print(lv_log_level_t level, const char* buf) {
-  LV_UNUSED(level);
-  //   Serial.println(buf);
-  //   Serial.flush();
+TaskHandle_t ntpTimeUpdateTask;
+
+void updateNtpLoop(void* pvParameters) {
+  for (;;) {
+    timeClient.forceUpdate();
+
+    delay(300000);
+  }
 }
 
 void setup() {
-  String LVGL_Arduino = String("LVGL Library Version: ") + lv_version_major() + "." + lv_version_minor() + "." + lv_version_patch();
   Serial.begin(19200);
-  Serial.println(LVGL_Arduino);
 
-  // Start LVGL
+  draw_buf = (uint32_t*) malloc(DRAW_BUF_SIZE/4);
+
   lv_init();
-  // Register print function for debugging
-  lv_log_register_print_cb(log_print);
 
   setupWiFi();
   setupOta();
 
   timeClient.begin();
+  timeClient.forceUpdate();
+
+  xTaskCreatePinnedToCore(
+    updateNtpLoop,       /* Task function. */
+    "ntpTimeUpdateTask", /* name of task. */
+    10000,               /* Stack size of task */
+    NULL,                /* parameter of the task */
+    1,                   /* priority of the task */
+    &ntpTimeUpdateTask,  /* Task handle to keep track of created task */
+    0);                  /* pin task to core 1 */
 
   // Start the SPI for the touchscreen and init the touchscreen
   touch_init(TP_SDA, TP_SCL, TP_RST, TP_INT);
@@ -116,10 +126,7 @@ void setup() {
   pinMode(HEATING_GPIO, OUTPUT);
   digitalWrite(HEATING_GPIO, GPIO_HEATING_OFF);
 
-  // Create a display object
-  lv_display_t* disp;
-  // Initialize the TFT display using the TFT_eSPI library
-  disp = lv_tft_espi_create(SCREEN_WIDTH, SCREEN_HEIGHT, draw_buf, sizeof(draw_buf));
+  lv_display_t* disp = lv_tft_espi_create(SCREEN_WIDTH, SCREEN_HEIGHT, draw_buf, sizeof(draw_buf));
   lv_display_set_rotation(disp, LV_DISPLAY_ROTATION_90);
 
   // Initialize an LVGL input device object (Touchscreen)
@@ -130,7 +137,6 @@ void setup() {
 
   init_subjects();
 
-  // Function to draw the GUI (text, buttons and sliders)
   build_display();
 
   lastSecond = lastTime = millis();
@@ -139,10 +145,8 @@ void setup() {
 bool isIdle = false;
 bool isOTA = false;
 void loop() {
-  timeClient.update();
-
   if (isOTA) {
-  loopOta();
+    loopOta();
   }
 
   unsigned long nowTime = millis();

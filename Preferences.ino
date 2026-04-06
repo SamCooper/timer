@@ -34,17 +34,17 @@ void init_subjects() {
 
 int get_initial_int(const char* key, int defaultValue) {
   if (preferences.isKey(key)) {
-    Serial.print("Pref: ");
-    Serial.print(key);
-    Serial.print("  : ");
+    // Serial.print("Pref: ");
+    // Serial.print(key);
+    // Serial.print("  : ");
     int i = preferences.getInt(key);
-    Serial.println(i);
+    // Serial.println(i);
     return i;
   } else {
     preferences.putInt(key, defaultValue);
-    Serial.print("Pref: ");
-    Serial.print(key);
-    Serial.print("  : Using default value");
+    // Serial.print("Pref: ");
+    // Serial.print(key);
+    // Serial.print("  : Using default value");
     return defaultValue;
   }
 }
