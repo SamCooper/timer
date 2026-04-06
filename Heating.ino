@@ -3,7 +3,7 @@ bool isTimerHeatingOn() {
   int morn_end_time = lv_subject_get_int(&timer_morning_end_subject);
   int eve_start_time = lv_subject_get_int(&timer_evening_start_subject);
   int eve_end_time = lv_subject_get_int(&timer_evening_end_subject);
-  int now_time = (timeClient.getHours() * 60) + timeClient.getMinutes();
+  int now_time = getHoursAndMinutes();
 
   if (((morn_start_time <= now_time) && (now_time < morn_end_time)) || ((eve_start_time <= now_time) && (now_time < eve_end_time))) {
     return true;

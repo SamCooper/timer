@@ -9,7 +9,7 @@
 // }
 
 void WiFiStationDisconnected(WiFiEvent_t event, WiFiEventInfo_t info) {
-  // Serial.println("Disconnected from WiFi access point");
+   Serial.println("Disconnected from WiFi access point");
   // Serial.print("WiFi lost connection. Reason: ");
   // Serial.println(info.wifi_sta_disconnected.reason);
   // Serial.println("Trying to Reconnect");
@@ -17,7 +17,7 @@ void WiFiStationDisconnected(WiFiEvent_t event, WiFiEventInfo_t info) {
 }
 
 void setupWiFi() {
-  // Serial.println("Starting WiFi... ");
+ Serial.println("Starting WiFi... ");
   WiFi.mode(WIFI_STA);
 
   // WiFi.onEvent(WiFiStationConnected, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_CONNECTED);
@@ -26,16 +26,16 @@ void setupWiFi() {
 
   WiFi.begin(ssid, password);
 
-  // Serial.println();
-  // Serial.println();
-  // Serial.println("Wait for WiFi... ");
+  Serial.println();
+  Serial.println();
+  Serial.println("Wait for WiFi... ");
 
   if (WiFi.waitForConnectResult() != WL_CONNECTED) {
-    // Serial.println("WiFi Failed");
+    Serial.println("WiFi Failed");
     delay(1000);
   } else {
-    // Serial.print("WiFi connected: ");
-    // Serial.println(WiFi.macAddress());
-    // Serial.println(WiFi.localIP());
+    Serial.print("WiFi connected: ");
+    Serial.println(WiFi.macAddress());
+    Serial.println(WiFi.localIP());
   }
 }

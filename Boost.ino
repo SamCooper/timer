@@ -197,7 +197,7 @@ void updateBoostState(heating_mode_t heating_mode) {
       int morn_end_time = lv_subject_get_int(&timer_morning_end_subject);
       int eve_start_time = lv_subject_get_int(&timer_evening_start_subject);
       int eve_end_time = lv_subject_get_int(&timer_evening_end_subject);
-      int now_time = (timeClient.getHours() * 60) + timeClient.getMinutes();
+      int now_time = getHoursAndMinutes();
       int adv = lv_subject_get_int(&heating_boost_next_subject);
 
       if (adv == 0 && (now_time == morn_start_time)) {

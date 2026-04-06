@@ -110,14 +110,12 @@ void create_mode_page(lv_obj_t* cont) {
 }
 
 void curr_time_home_cb(lv_observer_t* observer, lv_subject_t* subject) {
-  unsigned long rawTime = timeClient.getEpochTime();
+  int rawTime = lv_subject_get_int(subject);
+  int hours = rawTime / 3600;
+  int minutes = (rawTime % 3600) / 60;
 
-  unsigned long hours = (rawTime % 86400L) / 3600;
   String hoursStr = hours < 10 ? "0" + String(hours) : String(hours);
-
-  unsigned long minutes = (rawTime % 3600) / 60;
   String minuteStr = minutes < 10 ? "0" + String(minutes) : String(minutes);
-
   String timestamp = hoursStr + ":" + minuteStr;
 
   lv_subject_copy_string(&time_str_subject, timestamp.c_str());

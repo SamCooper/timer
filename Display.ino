@@ -92,11 +92,6 @@ void cont_observer_cb(lv_observer_t* observer, lv_subject_t* subject) {
   }
 }
 
-void updateTime() {
-  unsigned long rawTime = timeClient.getEpochTime();
-  lv_subject_set_int(&curr_time_subject, rawTime);
-}
-
 void wake_up_screen(lv_event_t* e) {
   lv_obj_clean(lv_layer_top());
   updateTime();

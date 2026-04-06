@@ -1,6 +1,6 @@
 #include <Preferences.h>
 #include <WiFi.h>
-#include "NTPClient.h"
+#include "time.h"
 #include <WiFiClient.h>
 #include <WebServer.h>
 #include <Update.h>
@@ -56,11 +56,9 @@ void set_evening_start(int value);
 void set_evening_end(int value);
 
 Preferences preferences;
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP);
 WebServer server(80);
 
-uint32_t* draw_buf;
+uint32_t draw_buf[DRAW_BUF_SIZE / 4];
 
 lv_subject_t current_tab_subject;
 lv_subject_t conf_brightness_subject;
@@ -87,37 +85,14 @@ lv_obj_t* footer_cont;
 unsigned long lastSecond = 0;
 unsigned long lastTime = 0;
 
-TaskHandle_t ntpTimeUpdateTask;
-
-void updateNtpLoop(void* pvParameters) {
-  for (;;) {
-    timeClient.forceUpdate();
-
-    delay(300000);
-  }
-}
-
 void setup() {
   Serial.begin(19200);
-
-  draw_buf = (uint32_t*) malloc(DRAW_BUF_SIZE/4);
 
   lv_init();
 
   setupWiFi();
   setupOta();
-
-  timeClient.begin();
-  timeClient.forceUpdate();
-
-  xTaskCreatePinnedToCore(
-    updateNtpLoop,       /* Task function. */
-    "ntpTimeUpdateTask", /* name of task. */
-    10000,               /* Stack size of task */
-    NULL,                /* parameter of the task */
-    1,                   /* priority of the task */
-    &ntpTimeUpdateTask,  /* Task handle to keep track of created task */
-    0);                  /* pin task to core 1 */
+  setupTime();
 
   // Start the SPI for the touchscreen and init the touchscreen
   touch_init(TP_SDA, TP_SCL, TP_RST, TP_INT);
@@ -136,7 +111,6 @@ void setup() {
   lv_indev_set_read_cb(indev, touchscreen_read);
 
   init_subjects();
-
   build_display();
 
   lastSecond = lastTime = millis();
