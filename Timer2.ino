@@ -23,6 +23,9 @@
 
 #define HEATING_GPIO 32
 
+const char* TZ_INFO = "GMT0BST,M3.5.0/1,M10.5.0"; 
+const char* ntpServer = "uk.pool.ntp.org";
+
 // GPIO to HIGH(1) to switch heating off
 typedef enum {
   GPIO_HEATING_ON = 0,

@@ -1,6 +1,6 @@
 void setupTime() {
   Serial.println("Config time...");
-  configTime(0, 3600, "pool.ntp.org");
+  configTzTime(TZ_INFO, ntpServer);
   Serial.println("Config time done");
 }
 
